@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	filterRE = regexp.MustCompile(`(?i)(?P<fc>mandatory|optional)\]\[(?P<e>\w+)\]\[(?P<f>\w+)\]\=`)
+	filterRE     = regexp.MustCompile(`&?filter\[`)
+	filterTypeRE = regexp.MustCompile(`(?i)(?P<type>mandatory|optional)\]\[(?P<filter>\w+)\]\[(?P<name>\w+)\]\=(?P<val>[\w\d\D]+)`)
 )
 
 type Options struct {
@@ -38,12 +39,92 @@ func parseFilters(qs string, options *Options) error {
 		return nil
 	}
 
-	pm := make(map[string]string)
-	m := filterRE.FindStringSubmatch(qs)
-	for i, n := range filterRE.SubexpNames() {
-		if i > 0 && i <= len(m) {
-			pm[n] = m[i]
+	filters := filterRE.Split(qs, -1)
+
+	for _, f := range filters {
+		if f == "" {
+			continue
 		}
+
+		var fm *map[string]string
+		m := filterTypeRE.FindStringSubmatch(f)
+
+		// identify the correct map (mandatory)
+		if m[1] == "mandatory" {
+			switch m[2] {
+			case "beginsWith":
+				fm = &options.Filter.Mandatory.BeginsWith
+			case "contains":
+				fm = &options.Filter.Mandatory.Contains
+			case "endsWith":
+				fm = &options.Filter.Mandatory.EndsWith
+			case "exact":
+				fm = &options.Filter.Mandatory.Exact
+			case "greaterThan":
+				fm = &options.Filter.Mandatory.GreaterThan
+			case "greaterThanEqual":
+				fm = &options.Filter.Mandatory.GreaterThanEqual
+			case "gt":
+				fm = &options.Filter.Mandatory.LessThanEqual
+			case "gte":
+				fm = &options.Filter.Mandatory.LessThanEqual
+			case "lessThan":
+				fm = &options.Filter.Mandatory.LessThan
+			case "lessThanEqual":
+				fm = &options.Filter.Mandatory.LessThanEqual
+			case "lt":
+				fm = &options.Filter.Mandatory.LessThanEqual
+			case "lte":
+				fm = &options.Filter.Mandatory.LessThanEqual
+			case "ne":
+				fm = &options.Filter.Mandatory.NotEqual
+			case "notEqual":
+				fm = &options.Filter.Mandatory.NotEqual
+			}
+		}
+
+		// identify the correct map (optional)
+		if m[1] == "optional" {
+			switch m[2] {
+			case "beginsWith":
+				fm = &options.Filter.Optional.BeginsWith
+			case "contains":
+				fm = &options.Filter.Optional.Contains
+			case "endsWith":
+				fm = &options.Filter.Optional.EndsWith
+			case "exact":
+				fm = &options.Filter.Optional.Exact
+			case "greaterThan":
+				fm = &options.Filter.Optional.GreaterThan
+			case "greaterThanEqual":
+				fm = &options.Filter.Optional.GreaterThanEqual
+			case "gt":
+				fm = &options.Filter.Optional.LessThanEqual
+			case "gte":
+				fm = &options.Filter.Optional.LessThanEqual
+			case "lessThan":
+				fm = &options.Filter.Optional.LessThan
+			case "lessThanEqual":
+				fm = &options.Filter.Optional.LessThanEqual
+			case "lt":
+				fm = &options.Filter.Optional.LessThanEqual
+			case "lte":
+				fm = &options.Filter.Optional.LessThanEqual
+			case "ne":
+				fm = &options.Filter.Optional.NotEqual
+			case "notEqual":
+				fm = &options.Filter.Optional.NotEqual
+			}
+		}
+
+		// if map doesn't exist, create it...
+		if (*fm) == nil {
+			(*fm) = map[string]string{m[3]: m[4]}
+			continue
+		}
+
+		// assign the provided field name and value to the filter map
+		(*fm)[m[3]] = m[4]
 	}
 
 	return nil

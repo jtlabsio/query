@@ -19,10 +19,19 @@ func TestFromQuerystring(t *testing.T) {
 		wantErr bool
 	}{
 		{"empty querystring", args{qs: ""}, &Options{}, false},
-		{"nested single filter", args{qs: "filter[mandatory][exact][fieldA]=value1&filter[mandatory][exact][fieldB]=value2"}, &Options{
+		{"nested multiple exact filter", args{qs: "filter[mandatory][exact][fieldA]=value1&filter[mandatory][exact][fieldB]=value2"}, &Options{
 			Filter: FilterContainer{
 				Mandatory: Filter{
-					Exact: map[string]interface{}{"fieldA": "value1", "fieldB": "value2"},
+					Exact: map[string]string{"fieldA": "value1", "fieldB": "value2"},
+				},
+				Optional: Filter{},
+			},
+		}, false},
+		{"nested multiple filters not repeated", args{qs: "filter[mandatory][exact][fieldA]=value1&filter[mandatory][beginsWith][fieldA]=blah"}, &Options{
+			Filter: FilterContainer{
+				Mandatory: Filter{
+					BeginsWith: map[string]string{"fieldA": "blah"},
+					Exact:      map[string]string{"fieldA": "value1"},
 				},
 				Optional: Filter{},
 			},
