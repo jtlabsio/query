@@ -24,7 +24,7 @@ func TestFromQuerystring(t *testing.T) {
 		}, false},
 		{"multiple filters not repeated and page", args{qs: "filter[fieldA]=value1&filter[fieldB]=value2&page[offset]=100"}, Options{
 			Filter: map[string]string{"fieldA": "value1", "fieldB": "value2"},
-			Page:   map[string]string{"offset": "100"},
+			Page:   map[string]int{"offset": 100},
 		}, false},
 	}
 	for _, tt := range tests {

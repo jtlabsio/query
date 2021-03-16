@@ -6,6 +6,7 @@ package queryoptions
 import (
 	"errors"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ var (
 // the querystring in bracketed object notation
 type Options struct {
 	Filter map[string]string `json:"filter"`
-	Page   map[string]string `json:"page"`
+	Page   map[string]int    `json:"page"`
 	Sort   []string          `json:"sort"`
 }
 
@@ -58,9 +59,15 @@ func parseBracketParams(qs string) (Options, error) {
 			o.Filter[term[2]] = values[i][1]
 		case "page":
 			if o.Page == nil {
-				o.Page = make(map[string]string)
+				o.Page = make(map[string]int)
 			}
-			o.Page[term[2]] = values[i][1]
+
+			v, err := strconv.ParseInt(values[i][1], 0, 64)
+			if err != nil {
+				return o, err
+			}
+
+			o.Page[term[2]] = int(v)
 		}
 	}
 
