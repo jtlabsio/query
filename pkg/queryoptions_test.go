@@ -15,26 +15,16 @@ func TestFromQuerystring(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *Options
+		want    Options
 		wantErr bool
 	}{
-		{"empty querystring", args{qs: ""}, &Options{}, false},
-		{"nested multiple exact filter", args{qs: "filter[mandatory][exact][fieldA]=value1&filter[mandatory][exact][fieldB]=value2"}, &Options{
-			Filter: FilterContainer{
-				Mandatory: Filter{
-					Exact: map[string]string{"fieldA": "value1", "fieldB": "value2"},
-				},
-				Optional: Filter{},
-			},
+		{"empty querystring", args{qs: ""}, Options{}, false},
+		{"multiple filters not repeated", args{qs: "filter[fieldA]=value1&filter[fieldB]=value2"}, Options{
+			Filter: map[string]string{"fieldA": "value1", "fieldB": "value2"},
 		}, false},
-		{"nested multiple filters not repeated", args{qs: "filter[mandatory][exact][fieldA]=value1&filter[mandatory][beginsWith][fieldA]=blah"}, &Options{
-			Filter: FilterContainer{
-				Mandatory: Filter{
-					BeginsWith: map[string]string{"fieldA": "blah"},
-					Exact:      map[string]string{"fieldA": "value1"},
-				},
-				Optional: Filter{},
-			},
+		{"multiple filters not repeated and page", args{qs: "filter[fieldA]=value1&filter[fieldB]=value2&page[offset]=100"}, Options{
+			Filter: map[string]string{"fieldA": "value1", "fieldB": "value2"},
+			Page:   map[string]string{"offset": "100"},
 		}, false},
 	}
 	for _, tt := range tests {

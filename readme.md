@@ -1,68 +1,67 @@
 # queryoptions
 
-## Query string parameters converted to structure queries
+This package provides [JSONAPI](https://jsonapi.org/) compliant querystring parsing. This package can be used to extract filters, pagination and sorting details from the querystring.
 
-### Filters
+## Usage
 
-At a high level, filters can be grouped as mandatory or optional. Supported filter types include:
+```go
+func newHandler(w http.ResponseWriter, r *http.Request) {
+  opt, err := queryoptions.FromQuerystring(r.URL.RawQuery)
+  if err != nil {
+    // unable to parse...
+  }
 
-* beginsWith
-* contains
-* endsWith
-* exact
-* greaterThan
-* greaterThanEqual
-* lessThan
-* lessThanEqual
-* notEqual
+  // work with the options...
+  for _, filter := range opt.Filter {
+    // each filter heare
+  }
 
-The filters are provided via bracketed notation.
+  // handle pagination
+  limit := 100
+  offset := 0
 
-`?filter[fieldName]=value`
+  if l, ok := opt.Page["limit"]; ok {
+    limit = l
+  }
 
-`?filter[mandatory][exact][fieldName]=value`
+  if o, ok := opt.Page["offset"]; ok {
+    offset = o
+  }
 
-```json
-{
-  "mandatory": {
-    "exact": {
-      "fieldName": "value"
-    }
+  for _, field := range opt.Sort {
+    // each sort field value here
   }
 }
 ```
 
-`?filter[mandatory][beginsWith][fieldName2]=value&filter[mandatory][exact][fieldName1]=test`
+### Options
 
-```json
-{
-  "mandatory": {
-    "beginsWith": {
-      "fieldName2": "value"
-    },
-    "exact": {
-      "fieldName1": "test"
-    }
-  }
-}
+The Options struct contains properties for the provided filters, pagination details and sorting details from the querystring.
+
+Options.Filter is a `map[string]string`, Options.Page is a `map[string]int` and Options.Sort is a `[]string`.
+
+### Filter
+
+JSONAPI specifications are agnostic about how filters can be provided. However, as noted in JSONAPI recommendations (<https://jsonapi.org/recommendations/#filtering>), there is an approach that many favor for clarity.
+
+It’s recommended that servers that wish to support filtering of a resource collection based upon associations do so by allowing query parameters that combine filter with the association name. For example, the following is a request for all comments associated with a particular post:
+
+```http
+GET /comments?filter[post]=1 HTTP/1.1
 ```
 
-`?filter[mandatory][beginsWith][fieldName2]=value&filter[mandatory][exact][fieldName1]=test&filter[optional][exact][someID]=1234`
+Multiple filter values can be combined in a comma-separated list. For example:
 
-```json
-{
-  "mandatory": {
-    "beginsWith": {
-      "fieldName2": "value"
-    },
-    "exact": {
-      "fieldName1": "test"
-    }
-  },
-  "optional": {
-    "exact": {
-      "someID": 1234
-    }
-  }
-}
+```http
+GET /comments?filter[post]=1,2 HTTP/1.1
 ```
+
+Furthermore, multiple filters can be applied to a single request:
+
+```http
+GET /comments?filter[post]=1,2&filter[author]=12 HTTP/1.1
+```
+
+### Page
+
+### Sort
