@@ -52,7 +52,7 @@ func parseBracketParams(qs string) (Options, error) {
 	terms := bracketRE.FindAllStringSubmatch(qs, -1)
 	values := valueRE.FindAllStringSubmatch(qs, -1)
 
-	if len(terms) > 0 && len(terms) != len(values) {
+	if len(terms) > 0 && len(terms) > len(values) {
 		// multiple nested bracket params... not sure how to parse
 		return o, errors.New("unable to parse: an object hierarchy has been provided")
 	}
