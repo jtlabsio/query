@@ -18,12 +18,8 @@ type Options struct {
 
 // First returns a querystring for the first page
 func (o Options) First() string {
-	if len(o.Page) == 0 {
-		return ""
-	}
-
-	if o.ps == nil {
-		return ""
+	if len(o.Page) == 0 || o.ps == nil {
+		return buildQuerystring(o.Filter, "", o.Sort)
 	}
 
 	// determine next page numbers based on pagination strategy
@@ -35,12 +31,8 @@ func (o Options) First() string {
 
 // Last returns a querystring for the last page
 func (o Options) Last(total int) string {
-	if len(o.Page) == 0 {
-		return ""
-	}
-
-	if o.ps == nil {
-		return ""
+	if len(o.Page) == 0 || o.ps == nil {
+		return buildQuerystring(o.Filter, "", o.Sort)
 	}
 
 	// determine next page numbers based on pagination strategy
@@ -52,12 +44,8 @@ func (o Options) Last(total int) string {
 
 // Next returns a querystring for the next page
 func (o Options) Next() string {
-	if len(o.Page) == 0 {
-		return ""
-	}
-
-	if o.ps == nil {
-		return ""
+	if len(o.Page) == 0 || o.ps == nil {
+		return buildQuerystring(o.Filter, "", o.Sort)
 	}
 
 	// determine next page numbers based on pagination strategy
@@ -76,12 +64,8 @@ func (o Options) PaginationStrategy() IPaginationStrategy {
 
 // Prev returns a querystring for the previous page
 func (o Options) Prev() string {
-	if len(o.Page) == 0 {
-		return ""
-	}
-
-	if o.ps == nil {
-		return ""
+	if len(o.Page) == 0 || o.ps == nil {
+		return buildQuerystring(o.Filter, "", o.Sort)
 	}
 
 	// determine previous page numbers based on pagination strategy

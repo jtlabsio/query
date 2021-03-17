@@ -112,7 +112,7 @@ func (ps PageSizeStrategy) First(c map[string]int) string {
 	if size, ok := c["size"]; ok {
 		s = size
 	} else {
-		// if limit isn't provided, return whatever was passed in
+		// if size isn't provided, return whatever was passed in
 		return ""
 	}
 
@@ -131,7 +131,7 @@ func (os PageSizeStrategy) Last(c map[string]int, total int) string {
 	if size, ok := c["size"]; ok {
 		s = size
 	} else {
-		// if limit isn't provided, return whatever was passed in
+		// if size isn't provided, return whatever was passed in
 		return ""
 	}
 
@@ -150,7 +150,7 @@ func (ps PageSizeStrategy) Next(c map[string]int) string {
 	if size, ok := c["size"]; ok {
 		s = size
 	} else {
-		// if limit isn't provided, return whatever was passed in
+		// if size isn't provided, return whatever was passed in
 		return ""
 	}
 
@@ -173,7 +173,7 @@ func (ps PageSizeStrategy) Prev(c map[string]int) string {
 	if size, ok := c["size"]; ok {
 		s = size
 	} else {
-		// if limit isn't provided, return whatever was passed in
+		// if size isn't provided, return whatever was passed in
 		return ""
 	}
 
