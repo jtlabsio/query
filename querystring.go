@@ -17,14 +17,6 @@ var (
 	valueRE   = regexp.MustCompile(`\=(.+?)(\&|\z)`)
 )
 
-// Options contain filtering, pagination and sorting instructions provided via
-// the querystring in bracketed object notation
-type Options struct {
-	Filter map[string][]string `json:"filter"`
-	Page   map[string]int      `json:"page"`
-	Sort   []string            `json:"sort"`
-}
-
 // FromQuerystring parses an Options object from the provided querystring
 func FromQuerystring(qs string) (Options, error) {
 	if qs == "" {
@@ -45,6 +37,7 @@ func FromQuerystring(qs string) (Options, error) {
 
 func parseBracketParams(qs string) (Options, error) {
 	o := Options{
+		qs:     qs,
 		Filter: map[string][]string{},
 		Page:   map[string]int{},
 		Sort:   []string{},
