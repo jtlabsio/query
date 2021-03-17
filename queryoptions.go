@@ -12,6 +12,7 @@ import (
 
 var (
 	bracketRE = regexp.MustCompile(`(?P<typ>filter|sort|page)\[(.+?)\](\=?)`)
+	sortRE    = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
 	valueRE   = regexp.MustCompile(`\=(.+?)(\&|\z)`)
 )
 
@@ -36,16 +37,21 @@ func FromQuerystring(qs string) (Options, error) {
 	}
 
 	// apply sort
+	options.Sort = parseSort(qs)
 
 	return options, nil
 }
 
 func parseBracketParams(qs string) (Options, error) {
-	o := Options{}
+	o := Options{
+		Filter: map[string]string{},
+		Page:   map[string]int{},
+		Sort:   []string{},
+	}
 	terms := bracketRE.FindAllStringSubmatch(qs, -1)
 	values := valueRE.FindAllStringSubmatch(qs, -1)
 
-	if len(terms) != len(values) {
+	if len(terms) > 0 && len(terms) != len(values) {
 		// multiple nested bracket params... not sure how to parse
 		return o, errors.New("unable to parse: an object hierarchy has been provided")
 	}
@@ -54,12 +60,12 @@ func parseBracketParams(qs string) (Options, error) {
 		switch strings.ToLower(term[1]) {
 		case "filter":
 			if o.Filter == nil {
-				o.Filter = make(map[string]string)
+				o.Filter = map[string]string{}
 			}
 			o.Filter[term[2]] = values[i][1]
 		case "page":
 			if o.Page == nil {
-				o.Page = make(map[string]int)
+				o.Page = map[string]int{}
 			}
 
 			v, err := strconv.ParseInt(values[i][1], 0, 64)
@@ -72,4 +78,15 @@ func parseBracketParams(qs string) (Options, error) {
 	}
 
 	return o, nil
+}
+
+func parseSort(qs string) []string {
+	sort := []string{}
+	fields := sortRE.FindAllStringSubmatch(qs, -1)
+
+	for _, field := range fields {
+		sort = append(sort, field[0])
+	}
+
+	return sort
 }
