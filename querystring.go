@@ -32,6 +32,15 @@ func FromQuerystring(qs string) (Options, error) {
 	// apply sort
 	options.Sort = parseSort(qs)
 
+	// attempt to infer pagination strategy
+	if _, ok := options.Page["limit"]; ok {
+		options.SetPaginationStrategy(&OffsetStrategy{})
+	}
+
+	if _, ok := options.Page["size"]; ok {
+		options.SetPaginationStrategy(&PageSizeStrategy{})
+	}
+
 	return options, nil
 }
 
