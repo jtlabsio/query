@@ -12,16 +12,10 @@ import (
 
 var (
 	bracketRE = regexp.MustCompile(`(?P<typ>filter|sort|page)\[(.+?)\](\=?)`)
+	commaRE   = regexp.MustCompile(`\s?\,\s?`)
+	sortRE    = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
 	valueRE   = regexp.MustCompile(`\=(.+?)(\&|\z)`)
 )
-
-// Options contain filtering, pagination and sorting instructions provided via
-// the querystring in bracketed object notation
-type Options struct {
-	Filter map[string]string `json:"filter"`
-	Page   map[string]int    `json:"page"`
-	Sort   []string          `json:"sort"`
-}
 
 // FromQuerystring parses an Options object from the provided querystring
 func FromQuerystring(qs string) (Options, error) {
@@ -36,16 +30,31 @@ func FromQuerystring(qs string) (Options, error) {
 	}
 
 	// apply sort
+	options.Sort = parseSort(qs)
+
+	// attempt to infer pagination strategy
+	if _, ok := options.Page["limit"]; ok {
+		options.SetPaginationStrategy(&OffsetStrategy{})
+	}
+
+	if _, ok := options.Page["size"]; ok {
+		options.SetPaginationStrategy(&PageSizeStrategy{})
+	}
 
 	return options, nil
 }
 
 func parseBracketParams(qs string) (Options, error) {
-	o := Options{}
+	o := Options{
+		qs:     qs,
+		Filter: map[string][]string{},
+		Page:   map[string]int{},
+		Sort:   []string{},
+	}
 	terms := bracketRE.FindAllStringSubmatch(qs, -1)
 	values := valueRE.FindAllStringSubmatch(qs, -1)
 
-	if len(terms) != len(values) {
+	if len(terms) > 0 && len(terms) > len(values) {
 		// multiple nested bracket params... not sure how to parse
 		return o, errors.New("unable to parse: an object hierarchy has been provided")
 	}
@@ -54,12 +63,19 @@ func parseBracketParams(qs string) (Options, error) {
 		switch strings.ToLower(term[1]) {
 		case "filter":
 			if o.Filter == nil {
-				o.Filter = make(map[string]string)
+				o.Filter = map[string][]string{}
 			}
-			o.Filter[term[2]] = values[i][1]
+
+			// check for array
+			if commaRE.MatchString(values[i][1]) {
+				o.Filter[term[2]] = commaRE.Split(values[i][1], -1)
+				continue
+			}
+
+			o.Filter[term[2]] = []string{values[i][1]}
 		case "page":
 			if o.Page == nil {
-				o.Page = make(map[string]int)
+				o.Page = map[string]int{}
 			}
 
 			v, err := strconv.ParseInt(values[i][1], 0, 64)
@@ -72,4 +88,22 @@ func parseBracketParams(qs string) (Options, error) {
 	}
 
 	return o, nil
+}
+
+func parseSort(qs string) []string {
+	sort := []string{}
+	fields := sortRE.FindAllStringSubmatch(qs, -1)
+
+	for _, field := range fields {
+		// check if sort value is an array
+		if commaRE.MatchString(field[1]) {
+			fa := commaRE.Split(field[1], -1)
+			sort = append(sort, fa...)
+			continue
+		}
+
+		sort = append(sort, field[1])
+	}
+
+	return sort
 }
