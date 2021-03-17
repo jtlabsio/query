@@ -38,7 +38,7 @@ func newHandler(w http.ResponseWriter, r *http.Request) {
 
 The Options struct contains properties for the provided filters, pagination details and sorting details from the querystring.
 
-Options.Filter is a `map[string]string`, Options.Page is a `map[string]int` and Options.Sort is a `[]string`.
+Options.Filter is a `map[string][]string`, Options.Page is a `map[string]int` and Options.Sort is a `[]string`.
 
 ### Filter
 
