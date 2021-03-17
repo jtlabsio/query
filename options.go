@@ -18,7 +18,7 @@ type Options struct {
 
 // First returns a querystring for the first page
 func (o Options) First() string {
-	if len(o.Sort) == 0 {
+	if len(o.Page) == 0 {
 		return ""
 	}
 
@@ -35,7 +35,7 @@ func (o Options) First() string {
 
 // Last returns a querystring for the last page
 func (o Options) Last(total int) string {
-	if len(o.Sort) == 0 {
+	if len(o.Page) == 0 {
 		return ""
 	}
 
@@ -52,7 +52,7 @@ func (o Options) Last(total int) string {
 
 // Next returns a querystring for the next page
 func (o Options) Next() string {
-	if len(o.Sort) == 0 {
+	if len(o.Page) == 0 {
 		return ""
 	}
 
@@ -76,7 +76,7 @@ func (o Options) PaginationStrategy() IPaginationStrategy {
 
 // Prev returns a querystring for the previous page
 func (o Options) Prev() string {
-	if len(o.Sort) == 0 {
+	if len(o.Page) == 0 {
 		return ""
 	}
 
@@ -97,7 +97,7 @@ func (o Options) SetPaginationStrategy(ps IPaginationStrategy) {
 	o.ps = ps
 }
 
-func buildQuerystring(filter map[string][]string, page map[string]int, sort []string) string {
+func buildQuerystring(filter map[string][]string, page string, sort []string) string {
 	b := strings.Builder{}
 	ra := false
 
@@ -122,7 +122,7 @@ func buildQuerystring(filter map[string][]string, page map[string]int, sort []st
 	}
 
 	// pagination
-	for term, val := range page {
+	if page != "" {
 		if ra {
 			fmt.Fprint(&b, "&")
 		}
@@ -130,21 +130,16 @@ func buildQuerystring(filter map[string][]string, page map[string]int, sort []st
 		// & is required on subsequent iterations
 		ra = true
 
-		// write the page spec to the builder
-		fmt.Fprintf(&b, "page[%s]=%d", term, val)
+		fmt.Fprint(&b, page)
 	}
 
 	// sorting
 	if len(sort) > 0 {
-		fmt.Fprintf(&b, "sort")
+		if ra {
+			fmt.Fprint(&b, "&")
+		}
+		fmt.Fprintf(&b, "sort=")
 		for i, field := range sort {
-			if ra {
-				fmt.Fprint(&b, "&")
-			}
-
-			// & is required on subsequent iterations
-			ra = true
-
 			// add a comma if multiple fields are specified
 			if i > 0 {
 				fmt.Fprint(&b, ",")

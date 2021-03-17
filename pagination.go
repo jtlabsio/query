@@ -1,168 +1,192 @@
 package queryoptions
 
+import "fmt"
+
 type IPaginationStrategy interface {
-	First(map[string]int) map[string]int
-	Last(map[string]int, int) map[string]int
-	Next(map[string]int) map[string]int
-	Prev(map[string]int) map[string]int
+	First(map[string]int) string
+	Last(map[string]int, int) string
+	Next(map[string]int) string
+	Prev(map[string]int) string
 }
 
 type OffsetStrategy struct{}
 
-func (os OffsetStrategy) First(c map[string]int) map[string]int {
-	ret := map[string]int{}
+func (os OffsetStrategy) First(c map[string]int) string {
+	var (
+		o int
+		l int
+	)
 
 	// read limit
 	if limit, ok := c["limit"]; ok {
-		ret["limit"] = limit
+		l = limit
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
-	ret["offset"] = 0
+	o = 0
 
-	return ret
+	return fmt.Sprintf("page[limit]=%d&page[offset]=%d", l, o)
 }
 
-func (os OffsetStrategy) Last(c map[string]int, total int) map[string]int {
-	ret := map[string]int{}
+func (os OffsetStrategy) Last(c map[string]int, total int) string {
+	var (
+		o int
+		l int
+	)
 
 	// read limit
 	if limit, ok := c["limit"]; ok {
-		ret["limit"] = limit
+		l = limit
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
-	offset := total / ret["limit"] * ret["limit"]
-	ret["offset"] = offset
+	o = total / l * l
 
-	return ret
+	return fmt.Sprintf("page[limit]=%d&page[offset]=%d", l, o)
 }
 
-func (os OffsetStrategy) Next(c map[string]int) map[string]int {
-	ret := map[string]int{}
+func (os OffsetStrategy) Next(c map[string]int) string {
+	var (
+		o int
+		l int
+	)
 
 	// read limit
 	if limit, ok := c["limit"]; ok {
-		ret["limit"] = limit
+		l = limit
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
 	if offset, ok := c["offset"]; ok {
-		ret["offset"] = offset + ret["limit"]
+		o = offset + l
 	} else {
-		ret["offset"] = 0
+		o = 0
 	}
 
-	return ret
+	return fmt.Sprintf("page[limit]=%d&page[offset]=%d", l, o)
 }
 
-func (os OffsetStrategy) Prev(c map[string]int) map[string]int {
-	ret := map[string]int{}
+func (os OffsetStrategy) Prev(c map[string]int) string {
+	var (
+		o int
+		l int
+	)
 
 	// read limit
 	if limit, ok := c["limit"]; ok {
-		ret["limit"] = limit
+		l = limit
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
 	if offset, ok := c["offset"]; ok {
-		ret["offset"] = offset - ret["limit"]
+		o = offset - l
 	} else {
-		ret["offset"] = 0
+		o = 0
 	}
 
 	// don't allow the offset to go below 0
-	if ret["offset"] < 0 {
-		ret["offset"] = 0
+	if o < 0 {
+		o = 0
 	}
 
-	return ret
+	return fmt.Sprintf("page[limit]=%d&page[offset]=%d", l, o)
 }
 
 type PageSizeStrategy struct{}
 
-func (ps PageSizeStrategy) First(c map[string]int) map[string]int {
-	ret := map[string]int{}
+func (ps PageSizeStrategy) First(c map[string]int) string {
+	var (
+		p int
+		s int
+	)
 
 	// read size
 	if size, ok := c["size"]; ok {
-		ret["size"] = size
+		s = size
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
-	ret["page"] = 0
+	p = 0
 
-	return ret
+	return fmt.Sprintf("page[size]=%d&page[page]=%d", s, p)
 }
 
-func (os PageSizeStrategy) Last(c map[string]int, total int) map[string]int {
-	ret := map[string]int{}
+func (os PageSizeStrategy) Last(c map[string]int, total int) string {
+	var (
+		p int
+		s int
+	)
 
 	// read size
 	if size, ok := c["size"]; ok {
-		ret["size"] = size
+		s = size
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
-	page := total / ret["size"]
-	ret["page"] = page
+	p = total / s
 
-	return ret
+	return fmt.Sprintf("page[size]=%d&page[page]=%d", s, p)
 }
 
-func (ps PageSizeStrategy) Next(c map[string]int) map[string]int {
-	ret := map[string]int{}
+func (ps PageSizeStrategy) Next(c map[string]int) string {
+	var (
+		p int
+		s int
+	)
 
 	// read size
 	if size, ok := c["size"]; ok {
-		ret["size"] = size
+		s = size
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
 	if page, ok := c["page"]; ok {
-		ret["page"] = page + 1
+		p = page + 1
 	} else {
-		ret["page"] = 0
+		p = 0
 	}
 
-	return ret
+	return fmt.Sprintf("page[size]=%d&page[page]=%d", s, p)
 }
 
-func (ps PageSizeStrategy) Prev(c map[string]int) map[string]int {
-	ret := map[string]int{}
+func (ps PageSizeStrategy) Prev(c map[string]int) string {
+	var (
+		p int
+		s int
+	)
 
 	// read size
 	if size, ok := c["size"]; ok {
-		ret["size"] = size
+		s = size
 	} else {
 		// if limit isn't provided, return whatever was passed in
-		return c
+		return ""
 	}
 
 	if page, ok := c["page"]; ok {
-		ret["page"] = page - 1
+		p = page - 1
 	} else {
-		ret["page"] = 0
+		p = 0
 	}
 
 	// don't allow the page to go below 0
-	if ret["page"] < 0 {
-		ret["page"] = 0
+	if p < 0 {
+		p = 0
 	}
 
-	return ret
+	return fmt.Sprintf("page[size]=%d&page[page]=%d", s, p)
 }
