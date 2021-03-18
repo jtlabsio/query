@@ -1,4 +1,7 @@
-# queryoptions
+# JSONAPI Compliant Querystring Parser
+
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/brozeph/queryoptions) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/brozeph/queryoptions/main/LICENSE) [![Coverage](http://gocover.io/_badge/github.com/brozeph/queryoptions)](http://gocover.io/github.com/brozeph/queryoptions)
+
 
 This package provides [JSONAPI](https://jsonapi.org/) compliant querystring parsing. This package can be used to extract filters, pagination and sorting details from the querystring.
 
