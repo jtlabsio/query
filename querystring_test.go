@@ -50,10 +50,22 @@ func TestFromQuerystring(t *testing.T) {
 			Sort:   []string{"fieldA", "fieldB", "fieldC"},
 		}, false},
 		{"filters, pagination and sorting provided", args{qs: "filter[fieldA]=value1,value2&filter[fieldB]=*test&page[offset]=10&page[limit]=10&sort=-fieldA,fieldB"}, Options{
-			qs: "filter[fieldA]=value1,value2&filter[fieldB]=*test&page[offset]=10&page[limit]=10&sort=-fieldA,fieldB",
+			qs:     "filter[fieldA]=value1,value2&filter[fieldB]=*test&page[offset]=10&page[limit]=10&sort=-fieldA,fieldB",
 			Filter: map[string][]string{"fieldA": {"value1", "value2"}, "fieldB": {"*test"}},
 			Page:   map[string]int{"offset": 10, "limit": 10},
 			Sort:   []string{"-fieldA", "fieldB"},
+		}, false},
+		{"no filters, no sorting, but pagination", args{qs: "page[limit]=10&page[offset]=10"}, Options{
+			qs:     "page[limit]=10&page[offset]=10",
+			Filter: map[string][]string{},
+			Page:   map[string]int{"offset": 10, "limit": 10},
+			Sort:   []string{},
+		}, false},
+		{"no filters, no sorting, but pagination and url decode", args{qs: "page%5Blimit%5D=10&page%5Boffset%5D=10"}, Options{
+			qs:     "page[limit]=10&page[offset]=10",
+			Filter: map[string][]string{},
+			Page:   map[string]int{"offset": 10, "limit": 10},
+			Sort:   []string{},
 		}, false},
 	}
 	for _, tt := range tests {
