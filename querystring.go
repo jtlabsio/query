@@ -5,6 +5,7 @@ package queryoptions
 
 import (
 	"errors"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,8 +24,13 @@ func FromQuerystring(qs string) (Options, error) {
 		return Options{}, nil
 	}
 
+	uqs, err := url.QueryUnescape(qs)
+	if err != nil {
+		return Options{}, err
+	}
+
 	// apply filter and page
-	options, err := parseBracketParams(qs)
+	options, err := parseBracketParams(uqs)
 	if err != nil {
 		return options, err
 	}
