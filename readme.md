@@ -48,6 +48,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("pagination provided with a limit of ", limit, ", and an offset of ", offset)
 
+	for _, field := range opt.Fields {
+		fmt.Println("limit response to include (or exclude) field: ", field)
+	}
+
 	for _, field := range opt.Sort {
 		fmt.Println("sort by field: ", field)
 	}
@@ -78,7 +82,7 @@ $ curl "localhost:8080?filter[fieldA]=value1,value2&filter[fieldB]=*test&page[of
 Notice the output in the server terminal window is as follows:
 
 ```bash
-$ go run examples/usage.go 
+$ go run examples/usage.go
 found supplied filter ( fieldA :  value1 )
 found supplied filter ( fieldA :  value2 )
 found supplied filter ( fieldB :  *test )
@@ -95,6 +99,7 @@ Options.Filter is a `map[string][]string`, Options.Page is a `map[string]int` an
 
 ```go
 options := &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{},
   Sort: []string{}
@@ -115,6 +120,7 @@ The above would result in the following `Options`:
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{
     "post": {"1"}
   },
@@ -133,6 +139,7 @@ The above would result in the following `Options`:
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{
     "post": {"1", "2"}
   },
@@ -151,8 +158,9 @@ GET /comments?filter[post]=1,2&filter[author]=12 HTTP/1.1
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{
-    "post": {"1", "2"}, 
+    "post": {"1", "2"},
     "author": {"12"}
   },
   Page: map[string]int{},
@@ -172,6 +180,7 @@ The above results in the following `Options`:
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{
 		"number": 2,
@@ -191,6 +200,7 @@ The above results in the following `Options`:
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{
 		"limit": 20,
@@ -210,10 +220,36 @@ GET /comments?page[whatever]=2121 HTTP/1.1
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{
 		"whatever": 2121,
 	},
+  Sort: []string{}
+}
+```
+
+### options.Fields
+
+In the JSONAPI specification, sparse fieldsets are supported as an array of field names: <https://jsonapi.org/format/#fetching-sparse-fieldsets>.
+
+```http
+GET /comments?fields=fieldA&fields=-fieldB HTTP/1.1
+```
+
+and this request...
+
+```http
+GET /comments?fields=fieldA,fieldB HTTP/1.1
+```
+
+Both result in the following `Options`:
+
+```go
+&queryoptions.Options{
+	Fields: []string{"fieldA","-fieldB"},
+  Filter: map[string][]string{},
+  Page: map[string]int{},
   Sort: []string{}
 }
 ```
@@ -236,6 +272,7 @@ Both result in the following `Options`:
 
 ```go
 &queryoptions.Options{
+	Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{},
   Sort: []string{"fieldA","fieldB"}
