@@ -99,7 +99,7 @@ Options.Filter is a `map[string][]string`, Options.Page is a `map[string]int` an
 
 ```go
 options := &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{},
   Sort: []string{}
@@ -120,7 +120,7 @@ The above would result in the following `Options`:
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{
     "post": {"1"}
   },
@@ -139,7 +139,7 @@ The above would result in the following `Options`:
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{
     "post": {"1", "2"}
   },
@@ -158,7 +158,7 @@ GET /comments?filter[post]=1,2&filter[author]=12 HTTP/1.1
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{
     "post": {"1", "2"},
     "author": {"12"}
@@ -180,7 +180,7 @@ The above results in the following `Options`:
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{
 		"number": 2,
@@ -200,7 +200,7 @@ The above results in the following `Options`:
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{
 		"limit": 20,
@@ -220,7 +220,7 @@ GET /comments?page[whatever]=2121 HTTP/1.1
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{
 		"whatever": 2121,
@@ -247,7 +247,7 @@ Both result in the following `Options`:
 
 ```go
 &queryoptions.Options{
-	Fields: []string{"fieldA","-fieldB"},
+  Fields: []string{"fieldA","-fieldB"},
   Filter: map[string][]string{},
   Page: map[string]int{},
   Sort: []string{}
@@ -272,7 +272,7 @@ Both result in the following `Options`:
 
 ```go
 &queryoptions.Options{
-	Fields: []string{},
+  Fields: []string{},
   Filter: map[string][]string{},
   Page: map[string]int{},
   Sort: []string{"fieldA","fieldB"}
