@@ -11,6 +11,7 @@ type Options struct {
 	ps IPaginationStrategy
 	qs string
 
+	Fields []string            `json:"fields"`
 	Filter map[string][]string `json:"filter"`
 	Page   map[string]int      `json:"page"`
 	Sort   []string            `json:"sort"`
@@ -19,12 +20,12 @@ type Options struct {
 // First returns a querystring for the first page
 func (o Options) First() string {
 	if len(o.Page) == 0 || o.ps == nil {
-		return buildQuerystring(o.Filter, "", o.Sort)
+		return buildQuerystring(o.Filter, o.Fields, "", o.Sort)
 	}
 
 	// determine next page numbers based on pagination strategy
 	po := o.ps.First(o.Page)
-	qs := buildQuerystring(o.Filter, po, o.Sort)
+	qs := buildQuerystring(o.Filter, o.Fields, po, o.Sort)
 
 	return qs
 }
@@ -32,12 +33,12 @@ func (o Options) First() string {
 // Last returns a querystring for the last page
 func (o Options) Last(total int) string {
 	if len(o.Page) == 0 || o.ps == nil {
-		return buildQuerystring(o.Filter, "", o.Sort)
+		return buildQuerystring(o.Filter, o.Fields, "", o.Sort)
 	}
 
 	// determine next page numbers based on pagination strategy
 	po := o.ps.Last(o.Page, total)
-	qs := buildQuerystring(o.Filter, po, o.Sort)
+	qs := buildQuerystring(o.Filter, o.Fields, po, o.Sort)
 
 	return qs
 }
@@ -45,12 +46,12 @@ func (o Options) Last(total int) string {
 // Next returns a querystring for the next page
 func (o Options) Next() string {
 	if len(o.Page) == 0 || o.ps == nil {
-		return buildQuerystring(o.Filter, "", o.Sort)
+		return buildQuerystring(o.Filter, o.Fields, "", o.Sort)
 	}
 
 	// determine next page numbers based on pagination strategy
 	po := o.ps.Next(o.Page)
-	qs := buildQuerystring(o.Filter, po, o.Sort)
+	qs := buildQuerystring(o.Filter, o.Fields, po, o.Sort)
 
 	return qs
 }
@@ -65,12 +66,12 @@ func (o Options) PaginationStrategy() IPaginationStrategy {
 // Prev returns a querystring for the previous page
 func (o Options) Prev() string {
 	if len(o.Page) == 0 || o.ps == nil {
-		return buildQuerystring(o.Filter, "", o.Sort)
+		return buildQuerystring(o.Filter, o.Fields, "", o.Sort)
 	}
 
 	// determine previous page numbers based on pagination strategy
 	po := o.ps.Prev(o.Page)
-	qs := buildQuerystring(o.Filter, po, o.Sort)
+	qs := buildQuerystring(o.Filter, o.Fields, po, o.Sort)
 
 	return qs
 }
@@ -81,7 +82,7 @@ func (o Options) SetPaginationStrategy(ps IPaginationStrategy) {
 	o.ps = ps
 }
 
-func buildQuerystring(filter map[string][]string, page string, sort []string) string {
+func buildQuerystring(filter map[string][]string, fields []string, page string, sort []string) string {
 	b := strings.Builder{}
 	ra := false
 
@@ -102,6 +103,22 @@ func buildQuerystring(filter map[string][]string, page string, sort []string) st
 				fmt.Fprint(&b, ",")
 			}
 			fmt.Fprint(&b, value)
+		}
+	}
+
+	// field projections
+	if len(fields) > 0 {
+		if ra {
+			fmt.Fprint(&b, "&")
+		}
+		fmt.Fprintf(&b, "fields=")
+		for i, field := range fields {
+			// add a comma if multiple fields are specified
+			if i > 0 {
+				fmt.Fprint(&b, ",")
+			}
+
+			fmt.Fprint(&b, field)
 		}
 	}
 

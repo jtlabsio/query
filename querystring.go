@@ -14,6 +14,7 @@ import (
 var (
 	bracketRE = regexp.MustCompile(`(?P<typ>filter|sort|page)\[(.+?)\](\=?)`)
 	commaRE   = regexp.MustCompile(`\s?\,\s?`)
+	fieldsRE  = regexp.MustCompile(`fields=(?P<field>.+?)(\&|\z)`)
 	sortRE    = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
 	valueRE   = regexp.MustCompile(`\=(.+?)(\&|\z)`)
 )
@@ -34,6 +35,9 @@ func FromQuerystring(qs string) (Options, error) {
 	if err != nil {
 		return options, err
 	}
+
+	// apply fields
+	options.Fields = parseFields(qs)
 
 	// apply sort
 	options.Sort = parseSort(qs)
@@ -94,6 +98,24 @@ func parseBracketParams(qs string) (Options, error) {
 	}
 
 	return o, nil
+}
+
+func parseFields(qs string) []string {
+	fields := []string{}
+	fieldNames := fieldsRE.FindAllStringSubmatch(qs, -1)
+
+	for _, field := range fieldNames {
+		// check if sort value is an array
+		if commaRE.MatchString(field[1]) {
+			fa := commaRE.Split(field[1], -1)
+			fields = append(fields, fa...)
+			continue
+		}
+
+		fields = append(fields, field[1])
+	}
+
+	return fields
 }
 
 func parseSort(qs string) []string {
