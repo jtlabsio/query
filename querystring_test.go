@@ -89,6 +89,18 @@ func TestFromQuerystring(t *testing.T) {
 			Page:   map[string]int{"offset": 10, "limit": 10},
 			Sort:   []string{},
 		}, false},
+		{"filters with lt, lte, gt and gte clauses", args{qs: "filter[iVal1]=%3C4&filter[iVal2]=%3C%3D3&filter[iVal3]=%3E1&filter[iVal4]=%3E%3D2"}, Options{
+			qs:     "filter[iVal1]=<4&filter[iVal2]=<=3&filter[iVal3]=>1&filter[iVal4]=>=2",
+			Fields: []string{},
+			Filter: map[string][]string{
+				"iVal1": {"<4"},
+				"iVal2": {"<=3"},
+				"iVal3": {">1"},
+				"iVal4": {">=2"},
+			},
+			Page: map[string]int{},
+			Sort: []string{},
+		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
