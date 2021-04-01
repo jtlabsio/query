@@ -33,6 +33,13 @@ func TestFromQuerystring(t *testing.T) {
 			Page:   map[string]int{"offset": 100},
 			Sort:   []string{},
 		}, false},
+		{"filters and fields", args{qs: "filter[fieldB]=value1&fields=fieldA,fieldB"}, Options{
+			qs:     "filter[fieldB]=value1&fields=fieldA,fieldB",
+			Fields: []string{"fieldA", "fieldB"},
+			Filter: map[string][]string{"fieldB": {"value1"}},
+			Page:   map[string]int{},
+			Sort:   []string{},
+		}, false},
 		{"single sort", args{qs: "sort=fieldA"}, Options{
 			qs:     "sort=fieldA",
 			Fields: []string{},
