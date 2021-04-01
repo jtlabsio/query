@@ -33,9 +33,23 @@ func TestFromQuerystring(t *testing.T) {
 			Page:   map[string]int{"offset": 100},
 			Sort:   []string{},
 		}, false},
-		{"filters and fields", args{qs: "filter[fieldB]=value1&fields=fieldA,fieldB"}, Options{
+		{"filters and fields A", args{qs: "filter[fieldB]=value1&fields=fieldA,fieldB"}, Options{
 			qs:     "filter[fieldB]=value1&fields=fieldA,fieldB",
 			Fields: []string{"fieldA", "fieldB"},
+			Filter: map[string][]string{"fieldB": {"value1"}},
+			Page:   map[string]int{},
+			Sort:   []string{},
+		}, false},
+		{"filters and fields B", args{qs: "fields=fieldA,fieldB&filter[fieldB]=value1"}, Options{
+			qs:     "fields=fieldA,fieldB&filter[fieldB]=value1",
+			Fields: []string{"fieldA", "fieldB"},
+			Filter: map[string][]string{"fieldB": {"value1"}},
+			Page:   map[string]int{},
+			Sort:   []string{},
+		}, false},
+		{"filters and fields C", args{qs: "fields=fieldA,fieldB&filter[fieldB]=value1&fields=fieldC"}, Options{
+			qs:     "fields=fieldA,fieldB&filter[fieldB]=value1&fields=fieldC",
+			Fields: []string{"fieldA", "fieldB", "fieldC"},
 			Filter: map[string][]string{"fieldB": {"value1"}},
 			Page:   map[string]int{},
 			Sort:   []string{},

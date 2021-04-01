@@ -5,6 +5,7 @@ package queryoptions
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -30,17 +31,20 @@ func FromQuerystring(qs string) (Options, error) {
 		return Options{}, err
 	}
 
-	// apply filter and page
-	options, err := parseBracketParams(uqs)
-	if err != nil {
-		return options, err
+	options := Options{
+		qs: uqs,
 	}
 
-	// apply fields
-	options.Fields = parseFields(qs)
+	// parse fields
+	options.Fields = parseFields(&uqs)
 
-	// apply sort
-	options.Sort = parseSort(qs)
+	// parse sort
+	options.Sort = parseSort(&uqs)
+
+	// parse filter and page
+	if err := parseBracketParams(uqs, &options); err != nil {
+		return options, err
+	}
 
 	// attempt to infer pagination strategy
 	if _, ok := options.Page["limit"]; ok {
@@ -54,19 +58,44 @@ func FromQuerystring(qs string) (Options, error) {
 	return options, nil
 }
 
-func parseBracketParams(qs string) (Options, error) {
-	o := Options{
-		qs:     qs,
-		Filter: map[string][]string{},
-		Page:   map[string]int{},
-		Sort:   []string{},
+func extract(qs *string, re regexp.Regexp) string {
+	coords := re.FindStringIndex(*qs)
+
+	var r string
+	if coords != nil {
+		if coords[0] == 0 {
+			// at beginning of string
+			r = (*qs)[coords[0]:coords[1]]
+			*qs = (*qs)[coords[1]:]
+			return r
+		}
+
+		if coords[1] == len(*qs) {
+			// at end of string
+			r = (*qs)[coords[0]:coords[1]]
+			*qs = (*qs)[0:coords[0]]
+			return r
+		}
+
+		// in middle of string
+		r = (*qs)[coords[0]:coords[1]]
+		*qs = fmt.Sprintf("%s%s", (*qs)[0:coords[0]], (*qs)[coords[1]:])
+		return r
 	}
+
+	return r
+}
+
+func parseBracketParams(qs string, o *Options) error {
+	o.Filter = map[string][]string{}
+	o.Page = map[string]int{}
+
 	terms := bracketRE.FindAllStringSubmatch(qs, -1)
 	values := valueRE.FindAllStringSubmatch(qs, -1)
 
 	if len(terms) > 0 && len(terms) > len(values) {
 		// multiple nested bracket params... not sure how to parse
-		return o, errors.New("unable to parse: an object hierarchy has been provided")
+		return errors.New("unable to parse: an object hierarchy has been provided")
 	}
 
 	for i, term := range terms {
@@ -90,47 +119,57 @@ func parseBracketParams(qs string) (Options, error) {
 
 			v, err := strconv.ParseInt(values[i][1], 0, 64)
 			if err != nil {
-				return o, err
+				return err
 			}
 
 			o.Page[term[2]] = int(v)
 		}
 	}
 
-	return o, nil
+	return nil
 }
 
-func parseFields(qs string) []string {
+func parseFields(qs *string) []string {
 	fields := []string{}
-	fieldNames := fieldsRE.FindAllStringSubmatch(qs, -1)
 
-	for _, field := range fieldNames {
-		// check if sort value is an array
-		if commaRE.MatchString(field[1]) {
-			fa := commaRE.Split(field[1], -1)
-			fields = append(fields, fa...)
-			continue
+	fieldNames := fieldsRE.FindAllStringSubmatch(extract(qs, *fieldsRE), -1)
+	for fieldNames != nil {
+		for _, field := range fieldNames {
+			// check if sort value is an array
+			if commaRE.MatchString(field[1]) {
+				fa := commaRE.Split(field[1], -1)
+				fields = append(fields, fa...)
+				continue
+			}
+
+			fields = append(fields, field[1])
 		}
 
-		fields = append(fields, field[1])
+		// look for more fields= occurrences
+		fieldNames = fieldsRE.FindAllStringSubmatch(extract(qs, *fieldsRE), -1)
 	}
 
 	return fields
 }
 
-func parseSort(qs string) []string {
+func parseSort(qs *string) []string {
 	sort := []string{}
-	fields := sortRE.FindAllStringSubmatch(qs, -1)
 
-	for _, field := range fields {
-		// check if sort value is an array
-		if commaRE.MatchString(field[1]) {
-			fa := commaRE.Split(field[1], -1)
-			sort = append(sort, fa...)
-			continue
+	fieldNames := sortRE.FindAllStringSubmatch(extract(qs, *sortRE), -1)
+	for fieldNames != nil {
+		for _, field := range fieldNames {
+			// check if sort value is an array
+			if commaRE.MatchString(field[1]) {
+				fa := commaRE.Split(field[1], -1)
+				sort = append(sort, fa...)
+				continue
+			}
+
+			sort = append(sort, field[1])
 		}
 
-		sort = append(sort, field[1])
+		// look for more sort= occurrences
+		fieldNames = sortRE.FindAllStringSubmatch(extract(qs, *sortRE), -1)
 	}
 
 	return sort
