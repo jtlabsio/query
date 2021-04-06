@@ -1,7 +1,7 @@
-// Package queryoptions provides a lightweight options object
+// options provides a lightweight options object
 // for parsing query parameters sent in a JSONAPI friendly way
 // via querystring parameters
-package queryoptions
+package options
 
 import (
 	"errors"

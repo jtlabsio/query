@@ -1,4 +1,4 @@
-package queryoptions
+package options
 
 import (
 	"testing"
