@@ -1,13 +1,13 @@
 # JSONAPI Compliant Querystring Parser
 
-[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/brozeph/queryoptions) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/brozeph/queryoptions/main/LICENSE) [![Coverage](http://gocover.io/_badge/github.com/brozeph/queryoptions)](http://gocover.io/github.com/brozeph/queryoptions)
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/jtlabsio/query) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/jtlabsio/query/main/LICENSE) [![Coverage](http://gocover.io/_badge/github.com/jtlabsio/query)](http://gocover.io/github.com/jtlabsio/query)
 
 
 This package provides [JSONAPI](https://jsonapi.org/) compliant querystring parsing. This package can be used to extract filters, pagination and sorting details from the querystring.
 
 ## Usage
 
-The queryoptions package is designed to be used either as middleware, or in a route handler for an HTTP request. The package can be used to parse out JSONAPI style filters, pagination details and sorting instructions as supplied via the querystring.
+The query options package is designed to be used either as middleware, or in a route handler for an HTTP request. The package can be used to parse out JSONAPI style filters, pagination details and sorting instructions as supplied via the querystring.
 
 ```go
 package main
@@ -17,11 +17,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/brozeph/queryoptions"
+	options "go.jtlabs.io/query"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	opt, err := queryoptions.FromQuerystring(r.URL.RawQuery)
+	opt, err := options.FromQuerystring(r.URL.RawQuery)
 	if err != nil {
 		fmt.Fprint(w, err)
 		return

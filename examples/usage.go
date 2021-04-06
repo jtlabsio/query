@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/brozeph/queryoptions"
+	options "go.jtlabs.io/query"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	opt, err := queryoptions.FromQuerystring(r.URL.RawQuery)
+	opt, err := options.FromQuerystring(r.URL.RawQuery)
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
