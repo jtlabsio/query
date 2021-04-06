@@ -5,6 +5,12 @@
 
 This package provides [JSONAPI](https://jsonapi.org/) compliant querystring parsing. This package can be used to extract filters, pagination and sorting details from the querystring.
 
+## Installation
+
+```bash
+go get -u go.jtlabs.io/query
+```
+
 ## Usage
 
 The query options package is designed to be used either as middleware, or in a route handler for an HTTP request. The package can be used to parse out JSONAPI style filters, pagination details and sorting instructions as supplied via the querystring.
