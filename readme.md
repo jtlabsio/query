@@ -1,6 +1,6 @@
 # JSONAPI Compliant Querystring Parser
 
-[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://pkg.go.dev/go.jtlabs.io/query) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/jtlabsio/query/main/LICENSE) [![Coverage](http://gocover.io/_badge/github.com/jtlabsio/query)](http://gocover.io/github.com/jtlabsio/query)
+[![godoc](http://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://pkg.go.dev/go.jtlabs.io/query) [![license](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://raw.githubusercontent.com/jtlabsio/query/main/LICENSE) [![Coverage](http://gocover.io/_badge/github.com/jtlabsio/query)](http://gocover.io/github.com/jtlabsio/query) [![GoReportCard example](https://goreportcard.com/badge/github.com/jtlabsio/query)](https://goreportcard.com/report/github.com/jtlabsio/query)
 
 
 This package provides [JSONAPI](https://jsonapi.org/) compliant querystring parsing. This package can be used to extract filters, pagination and sorting details from the querystring.

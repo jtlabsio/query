@@ -68,7 +68,7 @@ func TestFromQuerystring(t *testing.T) {
 			Page:   map[string]int{},
 			Sort:   []string{"fieldA", "fieldB", "fieldC"},
 		}, false},
-		{"mulitple fields via one parameter", args{qs: "sort=fieldA,fieldB,fieldC"}, Options{
+		{"multiple fields via one parameter", args{qs: "sort=fieldA,fieldB,fieldC"}, Options{
 			qs:     "sort=fieldA,fieldB,fieldC",
 			Fields: []string{},
 			Filter: map[string][]string{},
