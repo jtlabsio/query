@@ -11,10 +11,10 @@ type Options struct {
 	ps IPaginationStrategy
 	qs string
 
-	Fields []string            `json:"fields"`
-	Filter map[string][]string `json:"filter"`
+	Fields []string            `json:"fields,omitempty"`
+	Filter map[string][]string `json:"filter,omitempty"`
 	Page   map[string]int      `json:"page"`
-	Sort   []string            `json:"sort"`
+	Sort   []string            `json:"sort,omitempty"`
 }
 
 // First returns a querystring for the first page
