@@ -457,3 +457,69 @@ func TestOptions_Last(t *testing.T) {
 		})
 	}
 }
+
+func Test_contains(t *testing.T) {
+	type args struct {
+		list        []string
+		value       string
+		stripPrefix bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			"should not match if list is empty",
+			args{
+				[]string{},
+				"fieldA",
+				true,
+			},
+			false,
+		},
+		{
+			"should not match if value is empty",
+			args{
+				[]string{"fieldA", "fieldB", "fieldC"},
+				"",
+				true,
+			},
+			false,
+		},
+		{
+			"should properly strip prefix and find value in a list",
+			args{
+				[]string{"-fieldA", "fieldB", "fieldC"},
+				"fieldA",
+				true,
+			},
+			true,
+		},
+		{
+			"should properly match with prefix of <=",
+			args{
+				[]string{"<=fieldA", "fieldB", "fieldC"},
+				"fieldA",
+				true,
+			},
+			true,
+		},
+		{
+			"should not match value in a list if prefix is not stripped",
+			args{
+				[]string{"-fieldA", "fieldB", "fieldC"},
+				"fieldA",
+				false,
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := contains(tt.args.list, tt.args.value, tt.args.stripPrefix); got != tt.want {
+				t.Errorf("contains() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
