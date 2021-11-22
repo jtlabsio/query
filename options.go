@@ -17,6 +17,23 @@ type Options struct {
 	Sort   []string            `json:"sort,omitempty"`
 }
 
+// ContainsFilterField confirms whether or not the provided filter
+// parameters include the requested field
+func (o Options) ContainsFilterField(field string) bool {
+	fields := []string{}
+	for f := range o.Filter {
+		fields = append(fields, f)
+	}
+
+	return contains(fields, field, false)
+}
+
+// ContainsSortField confirms whether or not the provided sort options
+// contains the requested field
+func (o Options) ContainsSortField(field string) bool {
+	return contains(o.Sort, field, true)
+}
+
 // First returns a querystring for the first page
 func (o Options) First() string {
 	if len(o.Page) == 0 || o.ps == nil {
@@ -78,7 +95,7 @@ func (o Options) Prev() string {
 
 // SetPaginationStrategy can be used to specify custom pagination
 // increments for Next, Prev, First and Last
-func (o Options) SetPaginationStrategy(ps IPaginationStrategy) {
+func (o *Options) SetPaginationStrategy(ps IPaginationStrategy) {
 	o.ps = ps
 }
 
@@ -151,4 +168,33 @@ func buildQuerystring(filter map[string][]string, fields []string, page string, 
 	}
 
 	return b.String()
+}
+
+func contains(list []string, value string, stripPrefix bool) bool {
+	if len(list) == 0 {
+		return false
+	}
+
+	if value == "" {
+		return false
+	}
+
+	for _, search := range list {
+		// check to see if prefix should be stripped
+		if stripPrefix {
+			if len(search) > 2 && (search[0:2] == "<=" || search[0:2] == ">=" || search[0:2] == "!=") {
+				search = search[2:]
+			}
+
+			if len(search) > 1 && (search[0:1] == "<" || search[0:1] == ">" || search[0:1] == "-" || search[0:1] == "+" || search[0:1] == "!") {
+				search = search[1:]
+			}
+		}
+
+		if search == value {
+			return true
+		}
+	}
+
+	return false
 }
