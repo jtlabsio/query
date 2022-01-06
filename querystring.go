@@ -17,7 +17,7 @@ var (
 	commaRE   = regexp.MustCompile(`\s?\,\s?`)
 	fieldsRE  = regexp.MustCompile(`fields=(?P<field>.+?)(\&|\z)`)
 	sortRE    = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
-	valueRE   = regexp.MustCompile(`\=(.+?)(\&|\z)`)
+	valueRE   = regexp.MustCompile(`\=(.*?)(\&|\z)`)
 )
 
 // FromQuerystring parses an Options object from the provided querystring
