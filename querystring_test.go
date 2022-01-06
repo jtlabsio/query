@@ -182,6 +182,23 @@ func TestFromQuerystring(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"improperly formatted filter in querystring",
+			args{
+				qs: "filter[test]=value&filter[empty]&filter[other]=test",
+			},
+			Options{
+				qs:     "filter[test]=value&filter[empty]&filter[other]=test",
+				Fields: []string{},
+				Filter: map[string][]string{
+					"other": {"test"},
+					"test":  {"value"},
+				},
+				Page: map[string]int{},
+				Sort: []string{},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

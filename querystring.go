@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	bracketRE = regexp.MustCompile(`(?P<typ>filter|sort|page)\[(.+?)\](\=?)`)
+	bracketRE = regexp.MustCompile(`(?P<typ>filter|sort|page)\[([^&]+?)\](\={1})`)
 	commaRE   = regexp.MustCompile(`\s?\,\s?`)
 	fieldsRE  = regexp.MustCompile(`fields=(?P<field>.+?)(\&|\z)`)
 	sortRE    = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
