@@ -13,11 +13,11 @@ import (
 )
 
 var (
-	bracketRE = regexp.MustCompile(`(?P<typ>filter|sort|page)\[([^&]+?)\](\={1})`)
-	commaRE   = regexp.MustCompile(`\s?\,\s?`)
-	fieldsRE  = regexp.MustCompile(`fields=(?P<field>.+?)(\&|\z)`)
-	sortRE    = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
-	valueRE   = regexp.MustCompile(`\=(.*?)(\&|\z)`)
+	bracketRE      = regexp.MustCompile(`(?P<typ>filter|sort|page)\[([^&]+?)\](\={1})`)
+	bracketValueRE = regexp.MustCompile(`\]\=(.*?)(\&|\z)`)
+	commaRE        = regexp.MustCompile(`\s?\,\s?`)
+	fieldsRE       = regexp.MustCompile(`fields=(?P<field>.+?)(\&|\z)`)
+	sortRE         = regexp.MustCompile(`sort=(?P<field>.+?)(\&|\z)`)
 )
 
 // FromQuerystring parses an Options object from the provided querystring
@@ -91,7 +91,7 @@ func parseBracketParams(qs string, o *Options) error {
 	o.Page = map[string]int{}
 
 	terms := bracketRE.FindAllStringSubmatch(qs, -1)
-	values := valueRE.FindAllStringSubmatch(qs, -1)
+	values := bracketValueRE.FindAllStringSubmatch(qs, -1)
 
 	if len(terms) > 0 && len(terms) > len(values) {
 		// multiple nested bracket params... not sure how to parse
