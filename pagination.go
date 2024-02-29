@@ -6,6 +6,7 @@ import "fmt"
 // Next and Prev links based on the pagination mechanism that is
 // being implemented
 type IPaginationStrategy interface {
+	Current(map[string]int) string
 	First(map[string]int) string
 	Last(map[string]int, int) string
 	Next(map[string]int) string
@@ -15,6 +16,31 @@ type IPaginationStrategy interface {
 // OffsetStrategy is a pagination strategy for page[offset] and
 // page[limit] parameters
 type OffsetStrategy struct{}
+
+// Current returns a link to the current page
+func (os OffsetStrategy) Current(c map[string]int) string {
+	var (
+		o int
+		l int
+	)
+
+	// read limit
+	if limit, ok := c["limit"]; ok {
+		l = limit
+	} else {
+		// if limit isn't provided, return whatever was passed in
+		return ""
+	}
+
+	// read offset
+	if offset, ok := c["offset"]; ok {
+		o = offset
+	} else {
+		o = 0
+	}
+
+	return fmt.Sprintf("page[limit]=%d&page[offset]=%d", l, o)
+}
 
 // First returns a link to the first page
 func (os OffsetStrategy) First(c map[string]int) string {
@@ -112,6 +138,31 @@ func (os OffsetStrategy) Prev(c map[string]int) string {
 // PageSizeStrategy is a pagination strategy for page[size] and
 // page[page] parameters
 type PageSizeStrategy struct{}
+
+// Current returns a link to the current page
+func (ps PageSizeStrategy) Current(c map[string]int) string {
+	var (
+		p int
+		s int
+	)
+
+	// read size
+	if size, ok := c["size"]; ok {
+		s = size
+	} else {
+		// if size isn't provided, return whatever was passed in
+		return ""
+	}
+
+	// read page
+	if page, ok := c["page"]; ok {
+		p = page
+	} else {
+		p = 0
+	}
+
+	return fmt.Sprintf("page[size]=%d&page[page]=%d", s, p)
+}
 
 // First returns a link to the first page
 func (ps PageSizeStrategy) First(c map[string]int) string {

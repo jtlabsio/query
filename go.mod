@@ -1,3 +1,3 @@
 module go.jtlabs.io/query
 
-go 1.17
+go 1.22

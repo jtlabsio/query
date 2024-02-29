@@ -93,6 +93,11 @@ func (o Options) Prev() string {
 	return qs
 }
 
+// String returns a querystring for the current page
+func (o Options) String() string {
+	return buildQuerystring(o.Filter, o.Fields, o.ps.Current(o.Page), o.Sort)
+}
+
 // SetPaginationStrategy can be used to specify custom pagination
 // increments for Next, Prev, First and Last
 func (o *Options) SetPaginationStrategy(ps IPaginationStrategy) {
