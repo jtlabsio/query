@@ -458,6 +458,113 @@ func TestOptions_Last(t *testing.T) {
 	}
 }
 
+func TestOptions_String(t *testing.T) {
+	type fields struct {
+		ps     IPaginationStrategy
+		qs     string
+		Filter map[string][]string
+		Page   map[string]int
+		Sort   []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{"filters, sorting, but no pagination", fields{
+			OffsetStrategy{},
+			"filter[fieldA]=valueA,valueB&sort=fieldA,-fieldB",
+			map[string][]string{"fieldA": {"valueA", "valueB"}, "fieldB": {"valueC"}},
+			map[string]int{},
+			[]string{"fieldA,-fieldB"},
+		}, "filter[fieldA]=valueA,valueB&filter[fieldB]=valueC&sort=fieldA,-fieldB"},
+		{"no filters, no sorting, pagination provided without limit", fields{
+			OffsetStrategy{},
+			"page[limit]=100&page[offset]=0",
+			map[string][]string{},
+			map[string]int{"offset": 0},
+			[]string{},
+		}, ""},
+		{"no filters, no sorting, limit and offset provided", fields{
+			OffsetStrategy{},
+			"page[limit]=100&page[offset]=0",
+			map[string][]string{},
+			map[string]int{"offset": 0, "limit": 100},
+			[]string{},
+		}, "page[limit]=100&page[offset]=0"},
+		{"no filters, no sorting, offset provided", fields{
+			OffsetStrategy{},
+			"page[limit]=100&page[offset]=200",
+			map[string][]string{},
+			map[string]int{"offset": 200, "limit": 100},
+			[]string{},
+		}, "page[limit]=100&page[offset]=200"},
+		{"with filters, no sorting, limit and offset provided", fields{
+			OffsetStrategy{},
+			"filter[fieldA]=valueA,valueB&page[limit]=100&page[offset]=1000",
+			map[string][]string{"fieldA": {"valueA", "valueB"}},
+			map[string]int{"offset": 1000, "limit": 100},
+			[]string{},
+		}, "filter[fieldA]=valueA,valueB&page[limit]=100&page[offset]=1000"},
+		{"with filters, with sorting, offset strategy", fields{
+			OffsetStrategy{},
+			"filter[fieldA]=valueA,valueB&page[limit]=100&page[offset]=100&sort=fieldA,-fieldB",
+			map[string][]string{"fieldA": {"valueA", "valueB"}},
+			map[string]int{"offset": 100, "limit": 100},
+			[]string{"fieldA", "-fieldB"},
+		}, "filter[fieldA]=valueA,valueB&page[limit]=100&page[offset]=100&sort=fieldA,-fieldB"},
+		{"no filters, no sorting, missing size, pagesize strategy", fields{
+			PageSizeStrategy{},
+			"page[limit]=100&page[offset]=0",
+			map[string][]string{},
+			map[string]int{"page": 1},
+			[]string{},
+		}, ""},
+		{"no filters, no sorting, pagesize strategy", fields{
+			PageSizeStrategy{},
+			"page[size]=100&page[page]=0",
+			map[string][]string{},
+			map[string]int{"size": 100, "page": 0},
+			[]string{},
+		}, "page[size]=100&page[page]=0"},
+		{"no filters, no sorting, offset not zero, pagesize strategy", fields{
+			PageSizeStrategy{},
+			"page[size]=100&page[page]=2",
+			map[string][]string{},
+			map[string]int{"size": 100, "page": 2},
+			[]string{},
+		}, "page[size]=100&page[page]=2"},
+		{"with filters, no sorting, pagesize strategy", fields{
+			PageSizeStrategy{},
+			"filter[fieldA]=valueA,valueB&page[size]=100&page[page]=1000",
+			map[string][]string{"fieldA": {"valueA", "valueB"}},
+			map[string]int{"page": 1000, "size": 100},
+			[]string{},
+		}, "filter[fieldA]=valueA,valueB&page[size]=100&page[page]=1000"},
+		{"with filters, with sorting, pagesize strategy", fields{
+			PageSizeStrategy{},
+			"filter[fieldA]=valueA,valueB&page[size]=100&page[page]=100&sort=fieldA,-fieldB",
+			map[string][]string{"fieldA": {"valueA", "valueB"}},
+			map[string]int{"size": 100, "page": 100},
+			[]string{"fieldA", "-fieldB"},
+		}, "filter[fieldA]=valueA,valueB&page[size]=100&page[page]=100&sort=fieldA,-fieldB"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := Options{
+				ps:     tt.fields.ps,
+				qs:     tt.fields.qs,
+				Filter: tt.fields.Filter,
+				Page:   tt.fields.Page,
+				Sort:   tt.fields.Sort,
+			}
+			if got := o.String(); got != tt.want {
+				t.Errorf("Options.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_contains(t *testing.T) {
 	type args struct {
 		list        []string
