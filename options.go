@@ -95,6 +95,10 @@ func (o Options) Prev() string {
 
 // String returns a querystring for the current page
 func (o Options) String() string {
+	if o.Page == nil || o.ps == nil {
+		return buildQuerystring(o.Filter, o.Fields, "", o.Sort)
+	}
+
 	return buildQuerystring(o.Filter, o.Fields, o.ps.Current(o.Page), o.Sort)
 }
 
